@@ -1,49 +1,108 @@
-/*header*/
+
 /*sys keywords:
-$match, $null, ${varName}
+$null, ${varName}, @endl
+STD functions:
+**************
+@print       : Prints a text message to stdout
+@remember    : saves the param value to a disk store. It'll be used next time if no value is provided. 
+             !! Do not use this for params dependant on other params
+@return      : Stops execution and returns a string value. Technically, each template files is converted to a JS function equivalent. Lets called it a generator function
+@import      : Imports a JS file into this namespace. All functions will be available as local functions. Fns with same name will be overridden in the order of import
+@call        : call a function  
+@throw       : Stops execution, reverts any changes made, Throws an error message
+@release     : Each generator function is obliged to write the template @result to @destination file. This operation is denoted by @release
+               @release is called automatically at the end of execution if not interrupted by a @return
+
+STD properties:
+*************** 
+@holes, 
+@attachments, 
+@params, 
+@required, 
+@case, 
+@destination, 
+@do, 
+@delimiter       : Marks where the yaml config ends in a template file. default is #end-conf
  */
-/* Globals
+
+/**
+ * STD functions used as top level properties are not guarantied to execute in any particular order.
+ * use @do property to ensure sequential execution.
+ *  @do block is executed after @case block (if any). 
+ */
+
+/* default Variables. These are immutable
  result, stackPosition, {paramNames}, {imported Function names}
+ destination: this is a required and remembered param. asked for, if not set. destination can be empty if we have
  */
 
-//YAML example
-	name: sample
-	fill_between: /*@,@*/
-	params:
-		p1: Parameter 1
-		p2: Parameter 2
-		hook-path: Path to file where to hook
-		insert-at: pattern of string to attach hook at
+/**
+ * ANY NON-STD PROPERTY IS SET AS A VARIABLE.
+ * this is true inside a case statement too.
+ */
 
-	remember: hook-path, insert-at
-	required: hook-path, insert-at
-	params_if:
-		$match: p1,p2,stackPosition
-		$null,_,0: 
-			throw: param 1 can't be empty
-		$null,_:
-			print: Recursion failed
-			return: $null
-		_,test:
-			when_done:
-				run: sample2 ${p1} 1 
-				run: sample2 ${p1} 2
-			run: sample
-	do:
-		-	create: ${p1}.js
-			write: ${result}
-		-	in: ${hook-path}
-			at: ${hook-pattern}
-			write: require('${p1}')
+/**
+ * All committed file changes are reverted if an error is thrown.
+ */
 
-			// OR
-	import:
-		-	script1.js
-		-	script2.js
-	call: init // specs later
-		
 /*header*/
+
+@delimiter: ***************************************************************************************
+
+@holes:		#//looks for variable names enclosed in these strings. Default is `/*` and `*/`. Eg: /*varName*/
+	- /*@
+	- @*/
+@attachments:	#// list of files in which reference to the generated file is to be attached and rules for attachment
+	@{hook-path}:
+		anchor: 
+			- /*<-- models -->*/
+			- /*<-- models-end -->*/
+		glue: ;@endl	#//default is @endl
+		hook: require('@{p1}')@{hook-pattern}
+
+@params:		#// command line params
+	p1: Parameter 1
+	p2: Parameter 2
+	hook-path: Path to file where to hook
+	insert-at: pattern of string to attach hook at
+
+@remember: hook-path, insert-at
+@required: hook-path, insert-at
+
+/**
+ * a case statement can override these properties: 
+ * @result, @remember, @destination, @attachments,
+ * @attachments can be modified by providing an array of paths:
+ * 	(string: path) if no change from already defined in global @attachments.
+ * 	if there is change, an object with fields that change.
+ */
+@case:
+	@{p1},@{p2},@{stackPosition}:
+		@null,_,0: 
+			- @throw: param 1 can't be empty
+		@null,_:
+			- @print: Recursion failed
+			- @return: @null
+		_,test:
+			- var1: @{sample 55 68}
+			- temp_val: value
+
+
+#//at the end of execution or when $release called (first occurance only) `${result}` is written to @destination
+#//if this field is empty during @release, it'll throw an error and revert all changes.
+
+@destination: path/to/destination/can/must/be/relative/${p1}.js
+
+		// OR
+@import:
+	-	script1.js
+	-	script2.js
+@call: init // specs later
+		
+***************************************************************************************
 
 ;-P
 /*@p1@*/
+/*@temp_val@*/
+/*<-- insertHere -->*/
 ;-P
