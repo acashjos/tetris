@@ -1,7 +1,6 @@
-var fs=require('fs')
-var path=require('path')
-var Yaml = require('js-yaml')
-console.log('_____________________________________')
+import fs=require('fs')
+import path=require('path')
+console.log('_____________________________________',name)
 // console.log(process.argv)
 
 if(process.argv.length<4)
@@ -9,11 +8,11 @@ if(process.argv.length<4)
 
 var flags= process.argv[2]
 var dir
-var name= process.argv[4]
+var recipe= process.argv[4]
 
-if(!name){
+if(!recipe){
 	dir=process.cwd()
-	name=process.argv[3]
+	recipe=process.argv[3]
 }
 else 
 	dir=path.resolve(process.cwd(),process.argv[3])
@@ -23,10 +22,10 @@ flags=flags.replace(/^-/,'')
 
 
 
-	if(dir==path.resolve(dir,'../')+'/'+name)
+	if(dir==path.resolve(dir,'../')+'/'+recipe)
 		console.log('included')
 	else
-		dir=dir+'/'+name
+		dir=dir+'/'+recipe
 	try{
 		console.log(fs.statSync(dir))	
 	}
@@ -40,3 +39,4 @@ flags=flags.replace(/^-/,'')
 
 
 
+function ff(recipe){}

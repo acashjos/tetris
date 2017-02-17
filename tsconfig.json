@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outDir": "./build/ts",
+        "allowJs": true,
+        "target": "es5"
+    },
+    "include": [
+        "./src/**/*",
+        "./app.ts"
+    ]
+}
