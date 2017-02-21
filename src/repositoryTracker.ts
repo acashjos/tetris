@@ -1,8 +1,8 @@
 import fs=require('fs')
 import path=require('path')
-import {DuplicateTemplatesError} from "../src/Errors"
+import {Paint} from "./Errors"
 
-enum Type{
+export enum RecipeType{
     tetro,
     js
 }
@@ -10,13 +10,13 @@ enum Type{
 
 export default class Repository{
     _dir: string;
-    templates: Object;
+    recipes: Object;
 
 
     constructor(){
         this._dir = path.resolve(process.cwd(),"templates")
         let files = fs.readdirSync(this._dir)
-        this.templates = {}
+        this.recipes = {}
         files.forEach(file => {
             let filepath = path.join(this._dir , file)
             let fileStats = fs.lstatSync(filepath)
@@ -35,19 +35,24 @@ export default class Repository{
             }
             else if([".js",".tetro"].indexOf(path.extname(filepath)) == -1) return;
             else trimmedName = file.slice(0, -1 * path.extname(filepath).length)
-            if(this.templates[trimmedName]) 
-                throw(new DuplicateTemplatesError())
-            this.templates[trimmedName] = {
+            if(this.recipes[trimmedName]) {
+                let e = new ReferenceError(Paint("Multiple recipe files with same recipe name %rd_Br detected",trimmedName))
+                throw(e);
+            }
+            this.recipes[trimmedName] = {
                 name: trimmedName,
                 path: filepath,
-                type: path.extname(filepath) == ".tetro" ? Type.tetro : Type.js
+                type: path.extname(filepath) == ".tetro" ? RecipeType.tetro : RecipeType.js
             }
         })
 
-        console.log(this.templates)
     }
 
-    getTemplates(): Object{
-        return this.templates
+    getAllRecipes(): Object{
+        return this.recipes
+    }
+
+    getRecipe(key: string){
+        return this.recipes[key]
     }
 }
