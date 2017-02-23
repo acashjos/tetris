@@ -38,11 +38,11 @@ export default class ArgumentsParser{
 
 		var flags= this.rawInputs[2]
 		var dir
-		var recipe= this.rawInputs[4]
+		var tetro= this.rawInputs[4]
 
-		if(!recipe){
+		if(!tetro){
 			dir=process.cwd()
-			recipe=this.rawInputs[3]
+			tetro=this.rawInputs[3]
 		}
 		else 
 			dir=path.resolve(process.cwd(),this.rawInputs[3])
@@ -52,10 +52,10 @@ export default class ArgumentsParser{
 
 
 
-		if(dir==path.resolve(dir,'../')+'/'+recipe)
+		if(dir==path.resolve(dir,'../')+'/'+tetro)
 			console.log('included')
 		else
-			dir=dir+'/'+recipe
+			dir=dir+'/'+tetro
 		try{
 			console.log(fs.statSync(dir))	
 		}
@@ -72,10 +72,10 @@ export default class ArgumentsParser{
 	printHelp(){
 		let out = Paint(`\n%bu_Br   Prints this section\n\n`,'--help   -h')
 		out += Paint(`%bu_Br   \n`,'{recipeName} [param1 [param2 [...]  ]')
-		out += Paint(`              Runs a recipe injection\n\n`)
+		out += Paint(`              Runs a tetro injection\n\n`)
 		out += Paint(`%bu_Br   \n`,'--revert   -r {recipeName}')
-		out += `              Reverts a recipe injection\n`
-		out += `              This will throw an error of the recipe doesn't have a revert strategy\n`
+		out += `              Reverts a tetro injection\n`
+		out += `              This will throw an error of the tetro doesn't have a revert strategy\n`
 		console.log(out)
 		process.exit(0)
 	}
@@ -84,7 +84,7 @@ export default class ArgumentsParser{
 		let out = msg||"unknown operation!! please try any of the following"
 		console.log(Paint("%rd_Br",out))
 		if(process.env.NODE_ENV == "development"){
-			throw(new Error(out))
+			console.trace(Paint("%rd_Br",out))
 		}
 		if(!msg)this.printHelp();
 		process.exit(0)

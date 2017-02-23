@@ -8,7 +8,7 @@ class STDOps{
 
     store: Object = {}
 
-    constructor(public recipe: RecipeParser){};
+    constructor(public tetro: RecipeParser){};
 
     setVal(key,val){
         this.store[key]=val;

@@ -3,6 +3,10 @@ import Repository from  "./src/repositoryTracker"
 import RecipeParser from "./src/recipeParser";
 import ArgvParser from "./src/ArgumentsParser";
 import {Paint} from "./src/Errors"
+// import Promise = require("bluebird")
+
+// global.Promise = Promise;
+
 // import {CustomError} from "./src/Errors"
 
 if(process.env.NODE_ENV == "development"){
@@ -43,5 +47,5 @@ let recipes = new Repository();
 let args = new ArgvParser(process.argv, recipes)
 let job = new RecipeParser();
 let baseRecipe = recipes.getRecipe(args.getTarget())
-if(!baseRecipe) args.throwArgsError("Specified recipe does not exist")
+if(!baseRecipe) args.throwArgsError("Specified tetro does not exist")
 job.load(baseRecipe);

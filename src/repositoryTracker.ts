@@ -7,14 +7,19 @@ export enum RecipeType{
     js
 }
 
+export interface Tetro {
+    name: string,
+    path: string,
+    type: RecipeType
+}
 
 export default class Repository{
     _dir: string;
-    recipes: Object;
+    recipes: any;
 
 
     constructor(){
-        this._dir = path.resolve(process.cwd(),"templates")
+        this._dir = path.resolve(process.cwd(),".tetros")
         let files = fs.readdirSync(this._dir)
         this.recipes = {}
         files.forEach(file => {
@@ -36,7 +41,7 @@ export default class Repository{
             else if([".js",".tetro"].indexOf(path.extname(filepath)) == -1) return;
             else trimmedName = file.slice(0, -1 * path.extname(filepath).length)
             if(this.recipes[trimmedName]) {
-                let e = new ReferenceError(Paint("Multiple recipe files with same recipe name %rd_Br detected",trimmedName))
+                let e = new ReferenceError(Paint("Multiple tetro files with same tetro name %rd_Br detected",trimmedName))
                 throw(e);
             }
             this.recipes[trimmedName] = {
