@@ -6,24 +6,26 @@ import RecipeParser from "./recipeParser";
 
 class STDOps{
 
-    store: Object = {}
+	private store: Object = {};
 
-    constructor(public tetro: RecipeParser){};
+	constructor(public tetro: RecipeParser){};
 
-    setVal(key,val){
-        this.store[key]=val;
-    }
+	public setVal(key, val) {
+		this.store[key] = val;
+	}
 
-    print(val){ console.log(val);}
+	public print(val){
+		console.log(val);
+	}
 
-    return(val){
-        print()
-    }   
+	public return(val){
+		print();
+	}
 
-    revert(){
-
-    }
+	public revert() {
+		this.print(0);
+	}
 
 }
 
-export default STDOps
+export default STDOps;

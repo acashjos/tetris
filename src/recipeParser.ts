@@ -1,37 +1,43 @@
-import fs=require('fs')
-import Yaml = require('js-yaml')
+import fs = require("fs");
+import Yaml = require("js-yaml");
 import ArgumentsParser from "./ArgumentsParser";
-import STDOps from './stdOps'
-import {/*default as Repository,*/Tetro,RecipeType} from  "./repositoryTracker"
+import {/*default as Repository,*/ Itetro, RecipeType } from "./repositoryTracker"
+import STDOps from "./stdOps";
 
 // import Promise = require("bluebird")
 
-interface Content {yaml: string, template: string, split:boolean}
+interface Icontent {yaml: string; template: string; split: boolean; }
 
-const SPLIT_DELIMITTER = "::end"
+const SPLIT_DELIMITTER = "::end";
 
 export default class RecipeParser{
 
-    stdOps: STDOps;
-    
-    constructor(){
+	private stdOps: STDOps;
 
-        this.stdOps = new STDOps(this);
-    }
+	constructor() {
 
-    load(tetro: Tetro ){
-        // var readFile = Promise.promisify(fs.readFile);
-        console.log(tetro)
-        var content: string|Content = fs.readFileSync(tetro.path).toString()
-        content = content.split('\n').reduce((out,line) => {
+		this.stdOps = new STDOps(this);
+	}
 
-            if(line == SPLIT_DELIMITTER) out.split = true;
-            else if(out.split) out.template += line+"\n";
-            else out.yaml += line+"\n";
-            return out;
+	public load(tetro: Itetro ){
+		// var readFile = Promise.promisify(fs.readFile);
+		// tslint:disable-next-line:no-console
+		console.log(tetro)
+		let content: string|Icontent = fs.readFileSync(tetro.path).toString()
+		content = content.split("\n").reduce((out, line) => {
 
-        } ,  {yaml: "", template: "", split:false})
+			if (line === SPLIT_DELIMITTER) {
+				out.split = true;
+			} else if (out.split) {
+				out.template += line + "\n";
+			} else {
+				out.yaml += line + "\n";
+			}
+			return out;
 
-        console.log("template", content.template)
-    }
+		} ,  {yaml: "", template: "", split: false});
+
+		// tslint:disable-next-line:no-console
+		console.log("template", content.template);
+	}
 }

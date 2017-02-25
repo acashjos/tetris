@@ -1,2 +1,2 @@
-import fs=require('fs')
-import path=require('path')
+import fs= require("fs");
+import path= require("path");
