@@ -2,10 +2,12 @@
     "compilerOptions": {
         "outDir": "./build/ts",
         "allowJs": true,
-        "target": "es5"
+        "target": "es5",
+        "lib": ["DOM","ES5","ScriptHost","es2015.promise"]
     },
     "include": [
         "./src/**/*",
-        "./app.ts"
+        "./app.ts",
+        "./bin/*"
     ]
 }

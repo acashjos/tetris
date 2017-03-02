@@ -13,16 +13,21 @@ const SPLIT_DELIMITTER = "::end";
 export default class RecipeParser{
 
 	private stdOps: STDOps;
+	private config: any;
+	private template: string;
+	private params;//: {[key:string] : string}
 
-	constructor() {
+	constructor(private args: ArgumentsParser) {
 
 		this.stdOps = new STDOps(this);
 	}
 
-	public load(tetro: Itetro ){
+	public async load() {
+		const tetro = this.args.getTargetRecipe();
+		if (!tetro) { ArgumentsParser.throwArgsError("Specified tetro does not exist"); }
 		// var readFile = Promise.promisify(fs.readFile);
 		// tslint:disable-next-line:no-console
-		console.log(tetro)
+		console.log(tetro);
 		let content: string|Icontent = fs.readFileSync(tetro.path).toString()
 		content = content.split("\n").reduce((out, line) => {
 
@@ -37,7 +42,14 @@ export default class RecipeParser{
 
 		} ,  {yaml: "", template: "", split: false});
 
+		console.log("template", content.yaml);
+		this.config = Yaml.safeLoad(content.yaml);
+		this.template = content.template;
+		this.params =  await this.args.loadParams(this.config.$params);
+		console.log("this.params", this.params)
 		// tslint:disable-next-line:no-console
-		console.log("template", content.template);
+		// console.log("template", this.config);
 	}
+
+
 }

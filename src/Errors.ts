@@ -61,6 +61,7 @@ export function Paint(str: string, ...fillers: string[]): string {
 	let seg = str.match(globalRegx);
 	let out = "";
 	let pointer = 0;
+	if (!seg) {return str; }
 	for ( let x = 0; x < seg.length ; x++ ) {
 		const position = str.indexOf(seg[x]);
 		out += str.substr(pointer, position);

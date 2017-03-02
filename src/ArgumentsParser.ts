@@ -13,7 +13,7 @@ export default class ArgumentsParser{
 	private target: string;
 	private action: Actions = Actions.create;
 
-	constructor(input: string | string[], public repository: Repository, argvOffset?: number){
+	constructor(input: string | string[], argvOffset?: number){
 		if (typeof input === "string") {input = input.split(" ").filter( (x) => !!x); }
 		this.rawInputs = input;
 
@@ -22,7 +22,7 @@ export default class ArgumentsParser{
 		switch (this.rawInputs[argvOffset]){
 			case "--help" :
 			case "-h"     :
-				this.printHelp(); break;
+				ArgumentsParser.printHelp(); break;
 
 			case "--remove":
 			case "-r"     :
@@ -30,10 +30,10 @@ export default class ArgumentsParser{
 				argvOffset++; break;
 
 			default       :
-				if (/^-/.test(this.rawInputs[argvOffset])) {this.throwArgsError(); }
+				if (/^-/.test(this.rawInputs[argvOffset])) {ArgumentsParser.throwArgsError(); }
 		}
 
-		if (!this.rawInputs[argvOffset]) { this.throwArgsError(); }
+		if (!this.rawInputs[argvOffset]) { ArgumentsParser.throwArgsError(); }
 		this.target = this.rawInputs[argvOffset];
 
 		/*if(this.rawInputs.length<4)
@@ -71,8 +71,11 @@ export default class ArgumentsParser{
 	public getTarget(): string{
 		return this.target;
 	}
+	public getTargetRecipe(){
+		return Repository.getRecipe(this.target);
+	}
 
-	public printHelp(){
+	public static printHelp(){
 		let out = Paint(`\n%bu_Br   Prints this section\n\n`, "--help   -h");
 		out += Paint(`%bu_Br   \n`, "{recipeName} [param1 [param2 [...]  ]");
 		out += Paint(`              Runs a tetro injection\n\n`);
@@ -83,7 +86,7 @@ export default class ArgumentsParser{
 		process.exit(0);
 	}
 
-	public throwArgsError(msg?: string){
+	public static throwArgsError(msg?: string){
 		let out = msg||"unknown operation!! please try any of the following";
 		console.log(Paint("%rd_Br", out));
 		if (process.env.NODE_ENV === "development"){
@@ -91,5 +94,9 @@ export default class ArgumentsParser{
 		}
 		if (!msg){this.printHelp(); }
 		process.exit(0);
+	}
+
+	public async loadParams(params){
+		return {};
 	}
 }

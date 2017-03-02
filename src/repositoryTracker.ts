@@ -1,3 +1,4 @@
+import ArgumentsParse from "./ArgumentsParser";
 import fs = require("fs");
 import path = require("path");
 import {Paint} from "./Errors";
@@ -12,66 +13,71 @@ export interface Itetro {
 	type: RecipeType;
 }
 
-export default class Repository{
-	// tslint:disable-next-line:variable-name
-	private _dir: string;
-	private recipes: any;
+const _dir = path.resolve(process.cwd(), ".tetros");
+const files = fs.readdirSync(_dir)
+const recipes = {};
+files.forEach( file => {
+	let filepath = path.join(_dir , file);
+	let fileStats = fs.lstatSync(filepath);
+	let trimmedName: string;
+	if(fileStats.isDirectory()){
+		const subfiles = fs.readdirSync(filepath);
+		let tmp: string;
+		if (subfiles.indexOf(file + ".tetro") !== -1) {
+			tmp = path.join(filepath , file + ".tetro");
 
+		} else if(subfiles.indexOf("index.tetro") !== -1) {
+			tmp = path.join(filepath , "index.tetro");
 
-	constructor(){
-		this._dir = path.resolve(process.cwd(),".tetros")
-		const files = fs.readdirSync(this._dir)
-		this.recipes = {};
-		files.forEach( file => {
-			let filepath = path.join(this._dir , file);
-			let fileStats = fs.lstatSync(filepath);
-			let trimmedName: string;
-			if(fileStats.isDirectory()){
-				const subfiles = fs.readdirSync(filepath);
-				let tmp: string;
-				if (subfiles.indexOf(file + ".tetro") !== -1) {
-					tmp = path.join(filepath , file + ".tetro");
+		} else if(subfiles.indexOf(file + ".js") !== -1) {
+			tmp = path.join(filepath , file + ".js");
 
-				} else if(subfiles.indexOf("index.tetro") !== -1) {
-					tmp = path.join(filepath , "index.tetro");
+		} else if (subfiles.indexOf("index.js") !== -1) {
+			tmp = path.join(filepath , "index.js");
 
-				} else if(subfiles.indexOf(file + ".js") !== -1) {
-					tmp = path.join(filepath , file + ".js");
-
-				} else if (subfiles.indexOf("index.js") !== -1) {
-					tmp = path.join(filepath , "index.js");
-
-				}
-				if (!tmp) {return;}
-				filepath = tmp;
-				fileStats = fs.lstatSync(filepath);
-				trimmedName = file;
-			} else if ([".js", ".tetro"].indexOf(path.extname(filepath)) === -1) {
-				return;
-			} else {
-				trimmedName = file.slice(0, -1 * path.extname(filepath).length);
-			}
-
-			if (this.recipes[trimmedName]) {
-				const e = new ReferenceError(
-					Paint("Multiple tetro files with same tetro name %rd_Br detected", trimmedName)
-					);
-				throw(e);
-			}
-			this.recipes[trimmedName] = {
-				name: trimmedName,
-				path: filepath,
-				type: path.extname(filepath) === ".tetro" ? RecipeType.tetro : RecipeType.js,
-			};
-		});
-
+		}
+		if (!tmp) {return;}
+		filepath = tmp;
+		fileStats = fs.lstatSync(filepath);
+		trimmedName = file;
+	} else if ([".js", ".tetro"].indexOf(path.extname(filepath)) === -1) {
+		return;
+	} else {
+		trimmedName = file.slice(0, -1 * path.extname(filepath).length);
 	}
 
-	public getAllRecipes(): Object {
-		return this.recipes;
+	if (recipes[trimmedName]) {
+		const e = new ReferenceError(
+			Paint("Multiple tetro files with same tetro name %rd_Br detected", trimmedName)
+			);
+		throw(e);
 	}
+	recipes[trimmedName] = {
+		name: trimmedName,
+		path: filepath,
+		type: path.extname(filepath) === ".tetro" ? RecipeType.tetro : RecipeType.js,
+	};
+});
 
-	public getRecipe(key: string) {
-		return this.recipes[key];
+export default {
+	getAllRecipes: () => {
+		return recipes;
+	},
+
+	getRecipe: (key: string): Itetro => {
+		return recipes[key];
+	},
+
+	printList: () => {
+		Object.keys(recipes).forEach( item => {
+			process.stdout.write(  recipes[item].name +'\n');
+		})
+		process.exit(0);
+	},
+
+	test: (recipeName: string) => {
+		// Load a recipe and validate it.
+		ArgumentsParse.throwArgsError("validation has not been implemented")
+		return;
 	}
 }

@@ -1,11 +1,15 @@
 
+import * as Promise from "bluebird";
+import * as path from "path";
+import * as stackTrace from "stack-trace";
+import * as util from "util";
 import ArgvParser from "./src/ArgumentsParser";
 import {Paint} from "./src/Errors";
 import RecipeParser from "./src/recipeParser";
-import Repository from "./src/repositoryTracker";
-// import Promise = require("bluebird")
 
-// global.Promise = Promise;
+// import Promise from "bluebird"
+
+global.Promise = Promise;
 
 // import {CustomError} from "./src/Errors"
 
@@ -15,9 +19,6 @@ if(process.env.NODE_ENV == "development"){
  	* Make console.log verbose with filename and line number indication
  	*/
 
-	const stackTrace = require( "stack-trace ");
-	const path = require( "path ");
-	const util = require( "util ");
 
 	const realLog = console.log
 	// tslint:disable-next-line:only-arrow-functions
@@ -49,9 +50,13 @@ if(process.env.NODE_ENV == "development"){
 }
 
 
-const recipes = new Repository();
-const args = new ArgvParser(process.argv, recipes);
-const job = new RecipeParser();
-const baseRecipe = recipes.getRecipe(args.getTarget());
-if (!baseRecipe) {args.throwArgsError("Specified tetro does not exist"); }
-job.load(baseRecipe);
+export default class Main {
+
+	constructor() {
+
+		const args = new ArgvParser(process.argv);
+		const job = new RecipeParser(args);
+		job.load();
+
+	}
+}
