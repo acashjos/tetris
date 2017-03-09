@@ -1,8 +1,8 @@
 
 import path = require("path");
-import {Paint} from "./Errors";
+import {Paint,Throw} from "./Errors";
 import Repository from "./repositoryTracker";
-// console.log(input)
+// CLI.Log(input)
 
 enum Actions {
 	create, remove,
@@ -30,10 +30,10 @@ export default class ArgumentsParser{
 				argvOffset++; break;
 
 			default       :
-				if (/^-/.test(this.rawInputs[argvOffset])) {ArgumentsParser.throwArgsError(); }
+				if (/^-/.test(this.rawInputs[argvOffset])) {Throw(); }
 		}
 
-		if (!this.rawInputs[argvOffset]) { ArgumentsParser.throwArgsError(); }
+		if (!this.rawInputs[argvOffset]) { Throw(); }
 		this.target = this.rawInputs[argvOffset];
 
 		/*if(this.rawInputs.length<4)
@@ -50,17 +50,17 @@ export default class ArgumentsParser{
 		else
 			dir=path.resolve(process.cwd(),this.rawInputs[3])
 
-		// console.log(process.cwd(),this.rawInputs[3],path.resolve(process.cwd(),this.rawInputs[3]))
+		// CLI.Log(process.cwd(),this.rawInputs[3],path.resolve(process.cwd(),this.rawInputs[3]))
 		flags=flags.replace(/^-/,"")
 
 
 
 		if(dir==path.resolve(dir,"../")+"/"+tetro)
-			console.log("included")
+			CLI.Log("included")
 		else
 			dir=dir+"/"+tetro
 		try{
-			console.log(fs.statSync(dir))
+			CLI.Log(fs.statSync(dir))
 		}
 		catch(e){
 			fs.mkdirSync(dir);
@@ -82,17 +82,7 @@ export default class ArgumentsParser{
 		out += Paint(`%bu_Br   \n`, "--revert   -r {recipeName}");
 		out += `              Reverts a tetro injection\n`;
 		out += `              This will throw an error of the tetro doesn"t have a revert strategy\n`;
-		console.log(out);
-		process.exit(0);
-	}
-
-	public static throwArgsError(msg?: string){
-		let out = msg||"unknown operation!! please try any of the following";
-		console.log(Paint("%rd_Br", out));
-		if (process.env.NODE_ENV === "development"){
-			console.trace(Paint("%rd_Br", out));
-		}
-		if (!msg){this.printHelp(); }
+		CLI.Log(out);
 		process.exit(0);
 	}
 

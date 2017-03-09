@@ -1,7 +1,7 @@
-import ArgumentsParse from "./ArgumentsParser";
+
 import fs = require("fs");
 import path = require("path");
-import {Paint} from "./Errors";
+import CLI from "./CLI";
 
 export enum RecipeType{
 	tetro, js,
@@ -22,7 +22,7 @@ files.forEach( file => {
 	let trimmedName: string;
 	if(fileStats.isDirectory()){
 		const subfiles = fs.readdirSync(filepath);
-		let tmp: string;
+		let tmp: string = "";
 		if (subfiles.indexOf(file + ".tetro") !== -1) {
 			tmp = path.join(filepath , file + ".tetro");
 
@@ -48,7 +48,7 @@ files.forEach( file => {
 
 	if (recipes[trimmedName]) {
 		const e = new ReferenceError(
-			Paint("Multiple tetro files with same tetro name %rd_Br detected", trimmedName)
+			CLI.Paint("Multiple tetro files with same tetro name %rd_Br detected", trimmedName)
 			);
 		throw(e);
 	}
@@ -70,14 +70,14 @@ export default {
 
 	printList: () => {
 		Object.keys(recipes).forEach( item => {
-			process.stdout.write(  recipes[item].name +'\n');
+			process.stdout.write(  recipes[item].name + "\n");
 		})
 		process.exit(0);
 	},
 
 	test: (recipeName: string) => {
 		// Load a recipe and validate it.
-		ArgumentsParse.throwArgsError("validation has not been implemented")
+		CLI.getInstance().throw("validation has not been implemented");
 		return;
 	}
 }

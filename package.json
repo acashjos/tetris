@@ -4,20 +4,26 @@
   "description": "A tool for scaffolding",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc && node build/ts/app.js",
-    "dev": "reset && export NODE_ENV=development && tsc && node build/ts/app.js"
+    "test": "mocha build/ts",
+    "start": "node build/ts/bin/pump.js",
+    "build": "tsc",
+    "dev": "reset && export NODE_ENV=development && tsc -sourcemap && node build/ts/bin/pump.js"
   },
   "author": "Akash Kurian Jose",
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.4.7",
-    "js-yaml": "^3.8.1",
-    "prompt": "^1.0.0"
+    "inquirer": "^3.0.6",
+    "js-yaml": "^3.8.1"
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.37",
+    "@types/chai": "^3.4.35",
+    "@types/mocha": "^2.2.39",
     "@types/node": "^7.0.5",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "source-map-support": "^0.4.11",
     "stack-trace": "0.0.9"
   }
 }

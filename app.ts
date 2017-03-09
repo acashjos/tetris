@@ -1,62 +1,97 @@
 
-import * as Promise from "bluebird";
-import * as path from "path";
-import * as stackTrace from "stack-trace";
-import * as util from "util";
-import ArgvParser from "./src/ArgumentsParser";
-import {Paint} from "./src/Errors";
+// import ArgvParser from "./src/ArgumentsParser";
 import RecipeParser from "./src/recipeParser";
 
-// import Promise from "bluebird"
+import CLI from "./src/Errors";
+import Repository from "./src/repositoryTracker";
 
-global.Promise = Promise;
-
-// import {CustomError} from "./src/Errors"
-
-if(process.env.NODE_ENV == "development"){
-
-	/**
- 	* Make console.log verbose with filename and line number indication
- 	*/
-
-
-	const realLog = console.log
-	// tslint:disable-next-line:only-arrow-functions
-	console.log = function(){
-
-	let trace = stackTrace.get();
-	trace = trace[this.traceCursor || 1] || trace[0];
-	const logput: any = [
-			Paint( "%wt_Br ", "@ - line: "
-			+ trace.getLineNumber()
-			+ " on  "
-			+ path.relative(__dirname, trace.getFileName())),
-			"\n" ];
-	for (const x in arguments) {
-
-		if (typeof arguments[x] ===  "string") {
-			logput.push((parseInt(x, 10) > 0 && arguments[x].length > 50 ? "\n " : " ") + arguments[x]);
-		}else {
-
-			if (parseInt(x, 10) > 0) {
-				logput.push( "\n ");
-			}
-			logput.push(util.inspect(arguments[x], {colors: true}));
-		}
-	}
-
-	realLog.apply(null, logput);
-	};
+export interface IargumentDiscriptor {
+	action: (argv?: string[]) => any;
+	help: string| string[];
+	aliases?: string[];
 }
-
 
 export default class Main {
 
-	constructor() {
+	private argSignature: {[key: string]: IargumentDiscriptor} = {
 
-		const args = new ArgvParser(process.argv);
-		const job = new RecipeParser(args);
-		job.load();
+		"--help": {
+			action: this.printHelp.bind(this),
+			aliases: ["-h"],
+			help: "Prints this section",
+		},
+
+		"in": {
+			action: this.pumpIn.bind(this),
+			help: ["in {recipeName} [param1 [param2 [...]  ]", "Renders a recipe and injects."],
+		},
+
+		"list": {
+			action: Repository.printList,
+			help: "Prints list of all available recipes",
+		},
+		"out": {
+			action: this.pumpOut.bind(this),
+			help: ["out {recipeName}",
+				"Reverts a tetro injection\n",
+				"This will throw an error if the tetro doesn't have a revert strategy",
+			],
+		},
+		"test": {
+			action: () => { Repository.test(process.argv[3]); },
+			help: ["{recipe-name}", "Validates the specified recipe"],
+		},
+	};
+
+	public cli: CLI;
+
+	constructor( argv: string[]) {
+
+		this.cli = CLI.getInstance(this.argSignature);
+		let command: string = process.argv[2];
+		if (!command) {
+			this.cli.throw();
+			return;
+		}
+		let commandDefinition = this.argSignature[command];
+		if (!commandDefinition) {
+
+			command = Object.keys(this.argSignature).find(
+				key => (this.argSignature[key].aliases || []).indexOf(command) > -1) || command;
+			commandDefinition = this.argSignature[command];
+		}
+
+		if (!commandDefinition || !commandDefinition.action) {
+			this.cli.throw();
+		}
+
+		// run the command
+		commandDefinition.action(argv);
 
 	}
+
+	public async printHelp(args: string[]) {
+		let helpTable = this.argSignature;
+		if (args[3]) {
+			const recipe = new RecipeParser(args.slice(3));
+			helpTable = await recipe.getHelp();
+			// console.log("***",helpTable)
+			// return;
+		}
+
+		this.cli.printHelp(helpTable);
+
+		process.exit(0);
+	}
+
+	private pumpOut(args: string[]) {
+		const recipe = new RecipeParser(args.slice(3));
+		recipe.undo();
+	}
+
+	private pumpIn(args: string[]) {
+		const recipe = new RecipeParser(args.slice(3));
+		recipe.do();
+	}
+
 }

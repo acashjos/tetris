@@ -11,7 +11,20 @@
      * Any rules specified here will override those from the base config we are extending.
      */
     "arrow-parens": [true, "ban-single-arg-parens"],
-    "indent": [true, "tabs"]
+    "indent": [true, "tabs"],
+    "member-ordering": 
+      [true, {
+          "order": [
+              "static-field",
+              "static-method",
+              "instance-field",
+              "constructor",
+              "public-instance-method",
+              "protected-instance-method",
+              "private-instance-method"
+          ]
+      }],
+      "prefer-for-of": false
   },
   "jsRules": {
     /*

@@ -3,11 +3,13 @@
         "outDir": "./build/ts",
         "allowJs": true,
         "target": "es5",
-        "lib": ["DOM","ES5","ScriptHost","es2015.promise"]
+        "lib": ["dom","es5","scripthost","es2015"],
+        "strictNullChecks": true
     },
     "include": [
         "./src/**/*",
         "./app.ts",
-        "./bin/*"
+        "./bin/*",
+        "test"
     ]
 }

@@ -15,8 +15,12 @@ $params:        #// command line params
     - hook-path: Path to file where to hook
     - insert-at: pattern of string to attach hook at
 
-$remember: hook-path, insert-at
-$required: hook-path, insert-at
+$remember: 
+    - hook-path
+    - insert-at
+$required: 
+    - hook-path
+    - insert-at
 
 $case:
     ${p1},${p2},${stackPosition}:
