@@ -1,17 +1,20 @@
 {
-  "name": "tetromino.js",
+  "name": "tetris",
   "version": "0.0.1",
   "description": "A tool for scaffolding",
   "main": "app.js",
   "scripts": {
-    "test": "mocha build/ts",
+    "test": "npm run build && node ./node_modules/.bin/mocha ./test",
     "start": "node build/ts/bin/pump.js",
-    "build": "tsc",
+    "build": "rm -rf build/ts && tsc",
     "dev": "reset && export NODE_ENV=development && tsc -sourcemap && node build/ts/bin/pump.js"
   },
   "author": "Akash Kurian Jose",
   "license": "ISC",
   "dependencies": {
+    "@types/inquirer": "0.0.32",
+    "@types/js-yaml": "^3.5.29",
+    "@types/stack-trace": "0.0.28",
     "bluebird": "^3.4.7",
     "inquirer": "^3.0.6",
     "js-yaml": "^3.8.1"

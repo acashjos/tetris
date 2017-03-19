@@ -1,12 +1,13 @@
 import * as path from "path";
 import * as stackTrace from "stack-trace";
 import * as util from "util";
-import { IargumentDiscriptor } from "../app";
 
 /** colors */
 // Object.keys(colors).forEach(key => CLI.Log(colors[key],key,"\x1b[0m"))
+
+const ENDL = "\n";
 const resetColor = "\x1b[0m"; // reset
-const colorMods = {
+const colorMods: IstringMap = {
 	Br: "\x1b[1m",  // Bright
 	bl: "\x1b[5m",  // Blink
 	dm: "\x1b[2m",  // Dim
@@ -15,7 +16,7 @@ const colorMods = {
 	ul: "\x1b[4m",  // Underline
 };
 // Foreground
-const fgColors = {
+const fgColors: IstringMap = {
 	bk: "\x1b[30m",
 	bu: "\x1b[34m",
 	cn: "\x1b[36m",
@@ -26,7 +27,7 @@ const fgColors = {
 	yl: "\x1b[33m",
 };
 
-const bgColors = {
+const bgColors: IstringMap = {
 	bk: "\x1b[40m",
 	bu: "\x1b[44m",
 	cn: "\x1b[46m",
@@ -78,20 +79,20 @@ export default class CLI {
 		return out;
 	}
 
-	public static Log(...args) {
+	public static Log(...args: any[]) {
 /*
 * Make CLI.Log verbose with filename and line number indication
 */
 		if (process.env.NODE_ENV === "development") {
 			const err = new Error("Artificial error");
-			let trace = stackTrace.parse(err);
-			trace = trace[1];
+			const traceList = stackTrace.parse(err);
+			const trace = traceList[1];
 			process.stdout.write(
 					CLI.Paint( "%wt_Br ", "@ - line: "
 					+ trace.getLineNumber()
 					+ " on  "
 					+ path.relative(__dirname, trace.getFileName()))
-				+ "\n" );
+				+ ENDL );
 			for (let x = 0; x < arguments.length; ++x) {
 
 				if (arguments[x] ===  null || arguments[x] ===  undefined) {
@@ -104,31 +105,35 @@ export default class CLI {
 						+ util.inspect(arguments[x], {colors: true}));
 				}
 
-				process.stdout.write( "\n ");
+				process.stdout.write( ENDL);
 			}
 
 			process.stdout.write(
-				Array.from(Array( Math.floor((process.stdout as any).columns / 2)).keys()).reduce( (r, x) => r + "-", "") + "\n ");
+				Array.from(Array( Math.floor((process.stdout as any).columns / 2)).keys()).reduce( (r, x) => r + "-", "") + ENDL);
 		}
 		// else do not log
+	}
+
+	public static Echo(output: string){
+		process.stdout.write(ENDL + output);
+	}
+
+	public static Throw(msg?: string) {
+		const out = msg || "unknown operation!! please try any of the following";
+		process.stdout.write(out+ENDL);
+		if (process.env.NODE_ENV === "development") {
+			// tslint:disable-next-line:no-console
+			console.trace(CLI.Paint("%rd_Br", out));
+		}
+		if (!msg && CLI.instance) { CLI.instance.printHelp(); }
+		process.exit(0);
 	}
 
 	private constructor(private argSignature?: { [key: string]: IargumentDiscriptor }, private debug?: boolean) {
 		if (!argSignature) {
 			this.argSignature = {};
-			this.throw("CLI not initialized");
+			CLI.Throw("CLI not initialized");
 		}
-	}
-
-	public throw(msg?: string) {
-		const out = msg || "unknown operation!! please try any of the following";
-		process.stdout.write(out+"\n");
-		if (process.env.NODE_ENV === "development") {
-			// tslint:disable-next-line:no-console
-			console.trace(CLI.Paint("%rd_Br", out));
-		}
-		if (!msg) { this.printHelp(); }
-		process.exit(0);
 	}
 
 	public printHelp(printSignature?: { [key: string]: IargumentDiscriptor }) {
@@ -151,7 +156,7 @@ export default class CLI {
 
 		Object.keys(signature).forEach(element => {
 
-			process.stdout.write("\n\n");
+			process.stdout.write(ENDL + ENDL);
 
 			const segGap = 3;
 			const singleArg = signature[element];
@@ -164,16 +169,16 @@ export default class CLI {
 
 			if (helpSkipCols + segGap + segLengths[2] > (process.stdout as any).columns) {
 				helpSkipCols = segGap + segLengths[0];
-				process.stdout.write("\n" + this.fillup(" ", helpSkipCols, segGap));
+				process.stdout.write(ENDL + this.fillup(" ", helpSkipCols, segGap));
 			}
 
-			process.stdout.write(singleArg.help[0] + "\n");
+			process.stdout.write(singleArg.help[0] + ENDL);
 
 			for (let i = 1; i < singleArg.help.length; ++i) {
-				process.stdout.write(this.fillup(" ", helpSkipCols, segGap) + singleArg.help[i] + "\n");
+				process.stdout.write(this.fillup(" ", helpSkipCols, segGap) + singleArg.help[i] + ENDL);
 			}
 
-			process.stdout.write("\n");
+			process.stdout.write(ENDL);
 		});
 	}
 

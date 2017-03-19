@@ -2,8 +2,9 @@
 import fs = require("fs");
 import path = require("path");
 import CLI from "./CLI";
+import Yaml = require("js-yaml");
 
-export enum RecipeType{
+export enum RecipeType {
 	tetro, js,
 }
 
@@ -13,37 +14,55 @@ export interface Itetro {
 	type: RecipeType;
 }
 
-const _dir = path.resolve(process.cwd(), ".tetros");
-const files = fs.readdirSync(_dir)
-const recipes = {};
+const INDEX_DIR = path.resolve(process.cwd(), ".tetris");
+const NPM_SCOPE_DIR = path.resolve(process.cwd(), "node_modules", "@tetris");
+const STORE_FILE = path.resolve(INDEX_DIR,"store.yaml");
+
+const _dirs = [INDEX_DIR, NPM_SCOPE_DIR].filter(fs.existsSync);
+
+if(!_dirs || !_dirs.length) { CLI.Throw("Not a tetris enabled project. exiting!! "); }
+const files = _dirs.map(
+	dir => fs.readdirSync(dir).map(
+		file =>[dir, file]
+		)
+	).reduce((r,i) => r.concat(i),[])
+
+const recipes: {[key: string]: Itetro} = {};
+
+const store = fs.existsSync(STORE_FILE)
+	? Yaml.safeLoad(fs.readFileSync(STORE_FILE, {encoding:"utf8", flag:"r+"}).toString())
+	: {};
+
+
 files.forEach( file => {
-	let filepath = path.join(_dir , file);
+	let filepath =  path.join(file[0], file[1]);
 	let fileStats = fs.lstatSync(filepath);
 	let trimmedName: string;
 	if(fileStats.isDirectory()){
 		const subfiles = fs.readdirSync(filepath);
 		let tmp: string = "";
-		if (subfiles.indexOf(file + ".tetro") !== -1) {
-			tmp = path.join(filepath , file + ".tetro");
+		if (subfiles.indexOf(file[1] + ".tetro") !== -1) {
+			tmp = path.join(filepath , file[1] + ".tetro");
 
 		} else if(subfiles.indexOf("index.tetro") !== -1) {
 			tmp = path.join(filepath , "index.tetro");
 
-		} else if(subfiles.indexOf(file + ".js") !== -1) {
-			tmp = path.join(filepath , file + ".js");
+		} else if(subfiles.indexOf(file[1] + ".js") !== -1) {
+			tmp = path.join(filepath , file[1] + ".js");
 
 		} else if (subfiles.indexOf("index.js") !== -1) {
 			tmp = path.join(filepath , "index.js");
 
 		}
-		if (!tmp) {return;}
+
+		if (!tmp) {return; }
 		filepath = tmp;
 		fileStats = fs.lstatSync(filepath);
-		trimmedName = file;
+		trimmedName = file[1];
 	} else if ([".js", ".tetro"].indexOf(path.extname(filepath)) === -1) {
 		return;
 	} else {
-		trimmedName = file.slice(0, -1 * path.extname(filepath).length);
+		trimmedName = file[1].slice(0, -1 * path.extname(filepath).length);
 	}
 
 	if (recipes[trimmedName]) {
@@ -75,9 +94,20 @@ export default {
 		process.exit(0);
 	},
 
+	readStore(key: string): string {
+		return store ? store[key] : "";
+	},
+
+	updateStoreCache(key: string, value: string) {
+		store[key] = value;
+	},
+	writeStore(){
+		fs.writeFileSync(STORE_FILE, Yaml.safeDump(store));
+	},
+
 	test: (recipeName: string) => {
 		// Load a recipe and validate it.
-		CLI.getInstance().throw("validation has not been implemented");
+		CLI.Throw("validation has not been implemented");
 		return;
 	}
 }

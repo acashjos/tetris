@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // tslint:disable-next-line:no-var-requires
 require("source-map-support").install();
 import * as Promise from "bluebird";

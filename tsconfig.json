@@ -1,15 +1,10 @@
 {
     "compilerOptions": {
         "outDir": "./build/ts",
-        "allowJs": true,
+        "allowJs": false,
         "target": "es5",
         "lib": ["dom","es5","scripthost","es2015"],
-        "strictNullChecks": true
-    },
-    "include": [
-        "./src/**/*",
-        "./app.ts",
-        "./bin/*",
-        "test"
-    ]
+        "strictNullChecks": true,
+        "noImplicitAny": true
+    }
 }
