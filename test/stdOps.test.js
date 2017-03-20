@@ -12,9 +12,11 @@ var assert = chai.assert;
 
 		//Act
 		let recipeParser = new RecipeParser(args);
+		recipeParser.do();
 		let stdops = new STDOps(recipeParser)
-
+		
 describe("evalExp()", () => {
+
 	it("should be able to evaluate 'string..${hook-path}..string' to  'string..554..string'", ()=>{
 		
 		let heap = stdops.heap;
@@ -71,6 +73,32 @@ describe("resolveExpression()", () => {
 
 describe("selfCheck()", () => {
 
+	function applyOnPerfectHeap(keys,val){
+		stdops.heap = {
+			$attachments: {
+				"path1.js":{
+					anchor: ["/*","*/"],
+					glue: "string",
+					hook: "string${eval}",
+					matchIndent: false
+				},
+				"another/path.js":{
+					anchor: ["#","\n"],
+					hook: "string${eval}",
+					matchIndent: true
+				}
+			},
+			$commentLimitter: ["/*", "*/"],
+
+		}
+		if(keys && keys.length){
+			keys.reduce( (r,key,pos) => {
+				if(pos == keys.length-1) r[key] = val;
+				return r ? r[key] : r;
+			},stdops.heap)
+		}
+	}
+
 	after( ()=>{
 
 		stdops.heap = {
@@ -82,33 +110,36 @@ describe("selfCheck()", () => {
 	})
 
 	it("should check if the STDOps configuration is correct and normalized.", ()=>{
+
+		applyOnPerfectHeap();
+		expect(stdops.selfCheck(),"perfectHeap should pass selfTest").to.be.a('null');
 		//comment limiter
-		stdops.heap.$commentLimitter = "//";
-		expect(stdops.selfCheck(),"$commentLimitter can't be string")
-		.to.equal("$commentLimitter must be an array");
+		applyOnPerfectHeap(["$commentLimitter"] ,"//");
+		// expect(stdops.selfCheck(),"$commentLimitter can't be string").not.to.be.a('null');
 
-		stdops.heap.$commentLimitter = ["//"];
-		expect(stdops.selfCheck(),"$commentLimitter should be a `string[2]`")
-		.to.equal("$commentLimitter must have a starting and an ending segment");
+		applyOnPerfectHeap(["$commentLimitter"] ,["//"]);
+		expect(stdops.selfCheck(),"$commentLimitter should be a `string[2]`").not.to.be.a('null');
 
-		// stdops.heap.$commentLimitter = ["//","\n"];
-		// expect(stdops.selfCheck(),"$commentLimitter is a `string[2]` but still failed")
-		// .to.equal("$commentLimitter must have a starting and an ending segment");
 
 		// $attachments
-		stdops.heap.$attachments = {
-			"path1.js":{
-				anchor: "//",
-				glue?: string,
-				hook: string,
-				matchIndent: boolean;
-			}
-		};
-		expect(stdops.selfCheck(),"$commentLimitter can't be string")
-		.to.equal("$commentLimitter must be an array");
+		applyOnPerfectHeap(["$attachments", "path1.js","anchor"] ,undefined);
+		expect(stdops.selfCheck(),"$attachments anchor can't be empty").not.to.be.a('null');
 
-		stdops.heap.$commentLimitter = ["//"];
-		expect(stdops.selfCheck(),"$commentLimitter should be a `string[2]`")
-		.to.equal("$commentLimitter must have a starting and an ending segment");
+		applyOnPerfectHeap(["$attachments", "path1.js","anchor"] ,"//");
+		expect(stdops.selfCheck(),"$attachments anchor should be an array").not.to.be.a('null');
+
+		applyOnPerfectHeap(["$attachments", "path1.js","anchor"] ,["//"]);
+		expect(stdops.selfCheck(),"$attachments anchor should contain exactly 2 elements").not.to.be.a('null');
+
+		applyOnPerfectHeap(["$attachments", "path1.js","anchor"] ,["//","tt","\\"]);
+		expect(stdops.selfCheck(),"$attachments anchor should contain exactly 2 elements").not.to.be.a('null');
+
+		applyOnPerfectHeap(["$attachments", "path1.js","hook"] ,undefined);
+		expect(stdops.selfCheck(),"$attachments hook can't be empty").not.to.be.a('null');
+
+		applyOnPerfectHeap(["$attachments", "path1.js","hook"] ,"statc string");
+		expect(stdops.selfCheck(),"$attachments hook can't be empty").not.to.be.a('null');
+
+		/* $params */
 	})
 })
