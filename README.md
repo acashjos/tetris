@@ -1,3 +1,3 @@
-# Tetromino
+# Tetris
 A general purpose scaffolding tool
-Tetromino enables generating boilerplate code to speed up development.
+Tetris enables generating boilerplate code to speed up development.
