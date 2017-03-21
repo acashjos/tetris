@@ -19,6 +19,7 @@ class STDOps {
 		$endl: ENDL,
 		$result: "",
 	};
+
 	private sequence: IstringMap[];
 
 	constructor(private recipe: RecipeParser) {
@@ -53,13 +54,14 @@ class STDOps {
 	}
 
 	public print(val: string) {
-		CLI.Echo(val)
+		CLI.Echo(val);
 	}
 
 	public resolveEvalComponents(exp: string): { segments: string[], evals: string[] } {
-		// expression.match(/\$\{[^\}]+}/g)
+
 		const resolvedSegments: string[] = [];
 		const resolvedEvals: string[] = [];
+
 		let resolveAsEvalExp = false;
 		let segBuffer = "";
 		let isEscaping = false;
@@ -70,9 +72,10 @@ class STDOps {
 				isEscaping = true;
 				continue;
 			}
+
 			if (exp[i] === "$" && !isEscaping) {
 				if (resolveAsEvalExp) {
-					let previous = resolvedSegments.splice(-1);
+					const previous = resolvedSegments.splice(-1);
 					resolvedSegments.push(previous[0] + segBuffer);
 				} else {
 					resolveAsEvalExp = true;
@@ -82,12 +85,12 @@ class STDOps {
 			}
 			segBuffer += exp[i];
 			if (exp[i] === "}" && !isEscaping && resolveAsEvalExp) {
-				let match = segBuffer.match(/^\$\{(.+)}$/)
+				const match = segBuffer.match(/^\$\{(.+)}$/)
 				if (match && match[1]) {
 					resolveAsEvalExp = false;
 					resolvedEvals.push(match[1]);
 				} else {
-					let previous = resolvedSegments.splice(-1);
+					const previous = resolvedSegments.splice(-1);
 					resolvedSegments.push(previous[0] + segBuffer);
 				}
 				segBuffer = "";
@@ -95,7 +98,7 @@ class STDOps {
 
 			isEscaping = false;
 		}
-		resolvedSegments.push(segBuffer)
+		resolvedSegments.push(segBuffer);
 		return { segments: resolvedSegments, evals: resolvedEvals };
 	}
 
@@ -134,7 +137,7 @@ class STDOps {
 			}
 			return false;
 		}).filter(item => !!item);
-		if (corruptAttachment.length) { return corruptAttachment.join('\n'); }
+		if (corruptAttachment.length) { return corruptAttachment.join("\n"); }
 
 		// $params
 		const $params = this.recipe.getConfig().$params || [];
@@ -147,19 +150,18 @@ class STDOps {
 			}
 			return false;
 		}).filter(item => !!item);
-		if (corruptParams.length) { return corruptParams.join('\n'); }
+		if (corruptParams.length) { return corruptParams.join("\n"); }
 
 		return null;
 	}
 
-
-/**
- * Sets a key value pair in the current context heap
- * @param key key
- * @param val value
- */
+	/**
+	 * Sets a key value pair in the current context heap
+	 * @param key key
+	 * @param val value
+	 */
 	public setVal(key: string, val: string) {
-		if(unSettables.indexOf(key) !== -1) { return; }
+		if (unSettables.indexOf(key) !== -1) { return; }
 		this.heap[key] = this.escape(val);
 	}
 }
