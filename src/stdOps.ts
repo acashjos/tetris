@@ -164,6 +164,10 @@ class STDOps {
 		if (unSettables.indexOf(key) !== -1) { return; }
 		this.heap[key] = this.escape(val);
 	}
+
+	public evalB(exp: string): boolean {
+		return false;
+	}
 }
 
 export default STDOps;

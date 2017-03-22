@@ -1,3 +1,7 @@
+# maps should be ordered. If so, I don't have to deal with arrays of single property objects
+# think of a way to do it. Either add a Utility class that wrap around single property obj arrays
+# Or, modify yaml reader to return Maps instead of objects. this way the yaml document itself will look cleaner. (leading `-`s won't be required)
+
 $commentLimitter:        #.// defines the comment format relevant to the templated language. Default is `/*` and `*/` 
     - /*$
     - $*/
@@ -26,12 +30,12 @@ $params:        #// command line params
 
 $case:
     ${p1},${p2},${stackPosition}:
-        $null,_,0: 
+        _,*,0: 
             - $throw: param 1 can't be empty
-        $null,_:
+        _,*:
             - $print: Recursion failed
-            - $return: $null
-        _,test:
+            - $return: ${NULL}
+        *,test:
             - var1: ${sample 55 68}
             - temp_val: value
 
@@ -43,6 +47,37 @@ $destination: path/to/destination/can/must/be/relative/${p1}.js
 
 
 ::end
+
+
+/**  loop/if suggestion 1 **/
+
+::if boolean_variable
+
+if_block code here
+::endif
+
+::loop
+::set input ${evalExp} # this could be a method call, may be a stdin readline
+::set should_continue_loop ${evalB input}
+should_continue_loop is a variable and will have the evalExp value
+looping code here. This will act as a do-while loop until the while statement comes up.
+::while should_continue_loop
+everything after `while` is treated as a normal while loop.
+while statement takes one variable which it checks for truth.
+
+::endloop
+
+
+/**  suggestion 2 : loop and if combined**/
+::repeat
+::set input ${evalExp} # this could be a method call, may be a stdin readline
+::set should_continue_loop ${evalB ! input}
+this repeat block loops until a breakif statement passes.
+::breakif should_continue_loop
+to act as a normal if block put breakif at the top, just after loop statement.
+some content here
+
+::endrepeat
 
 ;-P
 /*$p1$*/
